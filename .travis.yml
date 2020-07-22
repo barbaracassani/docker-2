@@ -1,0 +1,22 @@
+language: generic
+sudo: required
+
+services:
+  - docker
+
+before_install:
+  - docker build -t barbarajacob/docker-2-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true barbarajacob/docker-2-test npm test
+
+after_success:
+  - docker build -t barbarajacob/docker-client-2 ./client
+  - docker build -t barbarajacob/docker-nginx-2 ./nginx
+  - docker build -t barbarajacob/docker-server-2 ./server
+  - docker build -t barbarajacob/docker-worker-2 ./worker
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push barbarajacob/docker-client-2
+  - docker push -t barbarajacob/docker-nginx-2
+  - docker push -t barbarajacob/docker-server-2
+  - docker push -t barbarajacob/docker-worker-2
